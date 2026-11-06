@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Up Helly Aa Memory Game</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Uncial+Antiqua&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#ead7a9;--paper2:#f5e8c6;--ink:#6b1410;--red:#9a1f14;--flame:#d2531a;--tan:#e2b86e;--brown:#4a2a12;
+  color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"IM Fell English",Georgia,"Times New Roman",serif;font-size:18px;line-height:1.45;background:var(--paper);
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/><feColorMatrix values='0 0 0 0 .4 0 0 0 0 .26 0 0 0 0 .1 0 0 0 .2 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),radial-gradient(ellipse at 20% 10%,rgba(255,250,225,.8),transparent 50%),radial-gradient(ellipse at center,transparent 50%,rgba(90,50,15,.5) 100%);background-attachment:fixed}
+main{max-width:680px;margin:0 auto;padding:16px 14px 40px}
+header{text-align:center}
+.ship{width:120px;height:80px;margin:0 auto -4px;stroke:var(--ink)}
+h1{font-family:"Uncial Antiqua",Georgia,serif;font-weight:400;margin:0;font-size:clamp(28px,8vw,44px);line-height:1.1;color:var(--red)}
+.sub{margin:6px auto 14px;max-width:34em;font-style:italic;color:var(--brown)}
+.bar{display:flex;justify-content:space-around;gap:8px;padding:8px 12px;margin-bottom:14px;background:rgba(245,232,198,.7);border:2px solid var(--ink);border-radius:255px 12px 225px 12px/12px 225px 12px 255px}
+.bar b{font-family:"Uncial Antiqua",Georgia,serif;font-weight:400;color:var(--red)}
+#board{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,2vw,12px)}
+.card{perspective:700px;aspect-ratio:4/5;border:0;padding:0;background:none;cursor:pointer;font:inherit;color:inherit;rotate:var(--r,0deg);transition:translate .2s}
+.card:hover{translate:0 -3px}
+.card:focus-visible{outline:3px solid var(--flame);outline-offset:3px}
+.inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.card.up .inner,.card.done .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid var(--ink);border-radius:14px 4px 12px 5px/5px 12px 4px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;text-align:center;box-shadow:2px 3px 0 rgba(74,42,18,.35)}
+.back{background:radial-gradient(circle at 50% 45%,#b12a1c 0 30%,#7a1210 31% 100%);color:var(--paper2)}
+.seal{width:62%;aspect-ratio:1;border-radius:50%;border:2px dashed rgba(245,232,198,.7);display:grid;place-items:center;font-family:"Uncial Antiqua",Georgia,serif;font-size:clamp(22px,7vw,38px)}
+.front{transform:rotateY(180deg);background:linear-gradient(160deg,var(--paper2),#e4cd96);gap:2px}
+.front.name{background:linear-gradient(160deg,#f1dfae,#dcc183);border-style:double;border-width:4px}
+.art{width:68%;height:auto;stroke:var(--ink);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tx{font-size:clamp(9px,2.6vw,13px);line-height:1.1;color:var(--ink)}
+.name .tx{font-family:"Uncial Antiqua",Georgia,serif;font-size:clamp(9px,2.7vw,13px);line-height:1.15;color:var(--red);padding:0 2px}
+.card.done .face{border-color:var(--red);box-shadow:0 0 0 2px var(--tan),2px 3px 6px rgba(74,42,18,.5)}
+.card.bad .front{animation:shake .4s}
+@keyframes shake{25%{translate:-4px}75%{translate:4px}}
+#fact{min-height:3.4em;margin:16px 0 8px;text-align:center;color:var(--brown);font-style:italic;border-top:1px dashed var(--ink);padding-top:12px}
+.cta{display:block;margin:6px auto 0;background:var(--red);color:var(--paper2);border:2px solid var(--ink);padding:9px 24px;font-family:"Uncial Antiqua",Georgia,serif;font-size:16px;cursor:pointer;border-radius:14px 4px 12px 5px/5px 12px 4px 14px;box-shadow:2px 3px 0 rgba(74,42,18,.4)}
+.cta:hover{background:var(--flame)}
+.cta:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+#win{display:none;position:fixed;inset:0;background:rgba(60,30,10,.75);align-items:center;justify-content:center;padding:20px;z-index:5}
+#win.show{display:flex}
+.scroll{max-width:400px;background:var(--paper2);border:3px double var(--ink);padding:26px 22px;text-align:center;border-radius:12px 4px 10px 4px}
+.scroll h2{font-family:"Uncial Antiqua",Georgia,serif;font-weight:400;color:var(--red);margin:0 0 8px;font-size:28px}
+.scroll p{margin:0 0 16px}
+@media (prefers-reduced-motion:reduce){.inner{transition:none}.card.bad .front{animation:none}.card{transition:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="longship" viewBox="0 0 64 64"><path d="M6 40Q32 56 58 40L54 36H10Z" fill="#e2b86e"/><path d="M58 40Q63 30 57 20M6 40Q1 30 7 20M32 36V8"/><path d="M32 10L50 20L32 32Z" fill="#d2531a"/><path d="M4 56q7-5 14 0t14 0 14 0 14 0"/></symbol>
+<symbol id="jarl" viewBox="0 0 64 64"><path d="M18 40A14 14 0 0 1 46 40Z" fill="#e2b86e"/><path d="M32 40V52M18 34Q6 28 4 14Q16 18 20 28M46 34Q58 28 60 14Q48 18 44 28"/><path d="M14 56Q32 62 50 56"/></symbol>
+<symbol id="squad" viewBox="0 0 64 64"><path d="M12 52L48 16M52 52L16 16M42 10l12 12M10 22l12-12" /><path d="M10 42l-4 6M54 42l4 6" /><circle cx="32" cy="34" r="4" fill="#e2b86e"/></symbol>
+<symbol id="torch" viewBox="0 0 64 64"><path d="M26 60L36 32" stroke-width="5"/><path d="M32 6Q46 20 38 30Q28 32 24 24Q22 14 32 6Z" fill="#d2531a"/><path d="M32 18Q38 24 34 28Q29 27 32 18Z" fill="#e2b86e"/></symbol>
+<symbol id="bill" viewBox="0 0 64 64"><path d="M20 40V60M44 40V60"/><path d="M6 10H58V40H6Z" fill="#e2b86e"/><path d="M14 18H50M14 25H42M14 32H48"/></symbol>
+<symbol id="fire" viewBox="0 0 64 64"><path d="M10 56L54 46M10 46L54 56"/><path d="M32 6Q50 24 42 38Q50 40 46 46H18Q12 38 24 30Q22 18 32 6Z" fill="#d2531a"/><path d="M32 26Q40 34 34 42H28Q24 34 32 26Z" fill="#e2b86e"/></symbol>
+<symbol id="cross" viewBox="0 0 64 64"><path d="M27 6H37V20H48V30H37V48H27V30H16V20H27Z" fill="#e2b86e"/><path d="M20 48H44V54H14V60H50V54H44"/></symbol>
+<symbol id="shield" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#e2b86e"/><circle cx="32" cy="32" r="6" fill="#d2531a"/><path d="M32 6V26M32 38V58M6 32H26M38 32H58M14 14L28 28M50 14L36 28M14 50L28 36M50 50L36 36"/></symbol>
+<symbol id="helmet" viewBox="0 0 64 64"><path d="M12 40A20 20 0 0 1 52 40Z" fill="#e2b86e"/><path d="M10 40H54M32 40V56M32 20V14"/><path d="M20 46Q32 52 44 46"/></symbol>
+<symbol id="axe" viewBox="0 0 64 64"><path d="M16 58L46 8" stroke-width="4"/><path d="M40 8Q60 12 58 34Q46 30 38 24Z" fill="#e2b86e"/></symbol>
+<symbol id="fiddle" viewBox="0 0 64 64"><path d="M32 22C20 22 18 32 24 36C16 42 20 58 32 58C44 58 48 42 40 36C46 32 44 22 32 22Z" fill="#e2b86e"/><path d="M32 22V4M28 38V50M36 38V50M52 8L14 54"/></symbol>
+<symbol id="notes" viewBox="0 0 64 64"><path d="M22 46V14L46 8V40"/><path d="M22 22L46 16"/><ellipse cx="17" cy="47" rx="6" ry="4.5" fill="#6b1410"/><ellipse cx="41" cy="41" rx="6" ry="4.5" fill="#6b1410"/></symbol>
+<symbol id="dragon" viewBox="0 0 64 64"><path d="M12 54V30Q12 12 30 12Q42 12 42 22Q36 22 34 27Q46 28 50 40Q52 48 44 54Z" fill="#e2b86e"/><circle cx="26" cy="22" r="2" fill="#6b1410"/><path d="M12 54Q30 60 44 54M30 12L34 4M38 14L44 8"/></symbol>
+<symbol id="crown" viewBox="0 0 64 64"><path d="M10 46L8 18L22 30L32 12L42 30L56 18L54 46Z" fill="#e2b86e"/><path d="M10 54H54"/><circle cx="32" cy="38" r="3" fill="#d2531a"/></symbol>
+<symbol id="group" viewBox="0 0 64 64"><use href="#helmet" x="16" y="2" width="32" height="32"/><use href="#helmet" x="0" y="28" width="32" height="32"/><use href="#helmet" x="32" y="28" width="32" height="32"/></symbol>
+<symbol id="march" viewBox="0 0 64 64"><use href="#torch" x="0" y="14" width="28" height="28"/><use href="#torch" x="18" y="6" width="28" height="28"/><use href="#torch" x="36" y="14" width="28" height="28"/><path d="M4 58H60"/></symbol>
+<symbol id="joke" viewBox="0 0 64 64"><path d="M8 10H56V40H30L18 54V40H8Z" fill="#e2b86e"/><circle cx="22" cy="22" r="2" fill="#6b1410"/><circle cx="42" cy="22" r="2" fill="#6b1410"/><path d="M18 28Q32 40 46 28Z"/></symbol>
+<symbol id="ring" viewBox="0 0 64 64"><circle cx="32" cy="32" r="20" stroke-dasharray="3 4"/><use href="#fire" x="20" y="-2" width="24" height="24"/><use href="#fire" x="20" y="42" width="24" height="24"/><use href="#fire" x="-2" y="20" width="24" height="24"/><use href="#fire" x="42" y="20" width="24" height="24"/></symbol>
+<symbol id="pin" viewBox="0 0 64 64"><path d="M32 60Q14 38 14 26A18 18 0 0 1 50 26Q50 38 32 60Z" fill="#d2531a"/><circle cx="32" cy="26" r="6" fill="#f5e8c6"/></symbol>
+<symbol id="banner" viewBox="0 0 64 64"><path d="M12 4V60"/><path d="M12 8H54L46 20L54 32H12Z" fill="#e2b86e"/><circle cx="30" cy="20" r="6" fill="#d2531a"/></symbol>
+<symbol id="nohorn" viewBox="0 0 64 64"><use href="#helmet" x="14" y="14" width="36" height="36"/><circle cx="32" cy="32" r="28" stroke="#d2531a" stroke-width="4"/><path d="M12 52L52 12" stroke="#d2531a" stroke-width="4"/></symbol>
+<symbol id="carved" viewBox="0 0 64 64"><use href="#axe" x="0" y="0" width="64" height="64"/><path d="M26 44l5-3M30 36l5-3M34 28l5-3" stroke="#d2531a"/></symbol>
+<symbol id="band" viewBox="0 0 64 64"><path d="M10 40V54Q24 60 38 54V40" fill="#e2b86e"/><ellipse cx="24" cy="40" rx="14" ry="5" fill="#f5e8c6"/><path d="M40 24Q62 14 60 36Q58 46 48 44"/><path d="M16 14L28 26M32 12L24 26"/></symbol>
+<symbol id="singer" viewBox="0 0 64 64"><circle cx="26" cy="34" r="18" fill="#e2b86e"/><circle cx="20" cy="28" r="1.8" fill="#6b1410"/><circle cx="32" cy="28" r="1.8" fill="#6b1410"/><ellipse cx="26" cy="41" rx="5" ry="6" fill="#6b1410"/><path d="M52 8V24M44 12L52 8"/><ellipse cx="48" cy="25" rx="4.5" ry="3.5" fill="#6b1410"/></symbol>
+</defs></svg>
+<main>
+  <header>
+    <svg class="ship" viewBox="0 0 64 64" style="fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><use href="#longship"/></svg>
+    <h1>Up Helly Aa Memory Game</h1>
+    <p class="sub">Every January, Lerwick burns a Viking ship. Flip two cards and match each picture with its name.</p>
+  </header>
+  <div class="bar" aria-live="polite">
+    <span>Moves: <b id="moves">0</b></span>
+    <span>Pairs: <b id="pairs">0</b>/12</span>
+    <span>Time: <b id="time">0:00</b></span>
+  </div>
+  <div id="board"></div>
+  <p id="fact">Flip a card to begin.</p>
+  <button class="cta" id="restart" type="button">Shuffle again</button>
+</main>
+<div id="win" role="dialog" aria-modal="true" aria-labelledby="wt">
+  <div class="scroll"><h2 id="wt">Well fought!</h2><p id="wmsg"></p><button class="cta" id="again" type="button">Play again</button></div>
+</div>
+<script>
+var DATA=[
+ {s:"longship",a:"Longship (The Galley)",b:"Viking Longship",s2:"dragon",f:"The wooden ship is built over several months, just to be burned."},
+ {s:"jarl",a:"Guizer Jarl",b:"Honorary Chief",s2:"crown",f:"The leader wears a winged helmet, axe, shield and a detailed Norse costume."},
+ {s:"squad",a:"Jarl Squad",b:"Viking Squad",s2:"group",f:"A group in full metal armor and furs."},
+ {s:"torch",a:"Lit Torch",b:"The Procession",s2:"march",f:"Each torch is made of wood and hemp soaked in paraffin."},
+ {s:"bill",a:"The Bill",b:"The Satirical Notice",s2:"joke",f:"A big hand-painted wooden sign full of community jokes."},
+ {s:"fire",a:"Fire / The Burning",b:"The Circle of Fire",s2:"ring",f:"The moment the torches are thrown into the ship."},
+ {s:"cross",a:"Market Cross",b:"Meeting Point",s2:"pin",f:"The center of Lerwick, where the Bill is placed."},
+ {s:"shield",a:"Viking Shield",b:"Squad Emblem",s2:"banner",f:"A round shield with designs from Norse mythology."},
+ {s:"helmet",a:"Viking Helmet",b:"Helmet Without Horns",s2:"nohorn",f:"A polished, historically accurate helmet. No horns!"},
+ {s:"axe",a:"Battle Axe",b:"Carved Axe",s2:"carved",f:"A ceremonial axe carried by the Jarl Squad."},
+ {s:"fiddle",a:"Instruments",b:"Music Band",s2:"band",f:"Musicians play the traditional songs of the march."},
+ {s:"notes",a:"Up Helly Aa Song",b:"Official Anthem",s2:"singer",f:"Musical notes and lyrics of the traditional anthem."}
+];
+var board=document.getElementById("board"),factEl=document.getElementById("fact");
+var first=null,lock=false,moves=0,found=0,t0=0,timer=null;
+function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function start(){
+  clearInterval(timer);timer=null;first=null;lock=false;moves=0;found=0;
+  document.getElementById("moves").textContent=0;
+  document.getElementById("pairs").textContent=0;
+  document.getElementById("time").textContent="0:00";
+  factEl.textContent="Flip a card to begin.";
+  document.getElementById("win").classList.remove("show");
+  var cards=[];
+  DATA.forEach(function(d,n){cards.push({n:n,t:d.a,s:d.s});cards.push({n:n,t:d.b,s:d.s2,nm:1})});
+  shuffle(cards);
+  board.innerHTML="";
+  cards.forEach(function(c){
+    var b=document.createElement("button");
+    b.className="card";b.type="button";b.dataset.n=c.n;
+    b.style.setProperty("--r",((Math.random()*3)-1.5).toFixed(1)+"deg");
+    b.setAttribute("aria-label","Hidden card");
+    var front=!c.nm?'<div class="face front"><svg class="art" viewBox="0 0 64 64" aria-hidden="true"><use href="#'+c.s+'"/></svg><span class="tx">'+c.t+'</span></div>'
+                 :'<div class="face front name"><svg class="art" viewBox="0 0 64 64" aria-hidden="true"><use href="#'+c.s+'"/></svg><span class="tx">'+c.t+'</span></div>';
+    b.innerHTML='<div class="inner"><div class="face back"><div class="seal">ᚦ</div></div>'+front+'</div>';
+    b.addEventListener("click",function(){flip(b)});
+    board.appendChild(b);
+  });
+}
+function flip(b){
+  if(lock||b.classList.contains("up")||b.classList.contains("done"))return;
+  if(!timer){t0=Date.now();timer=setInterval(function(){document.getElementById("time").textContent=fmt(Math.floor((Date.now()-t0)/1000))},500)}
+  b.classList.add("up");
+  b.setAttribute("aria-label",b.querySelector(".tx").textContent);
+  if(!first){first=b;return}
+  moves++;document.getElementById("moves").textContent=moves;
+  var a=first;first=null;
+  if(a.dataset.n===b.dataset.n){
+    a.classList.replace("up","done");b.classList.replace("up","done");
+    found++;document.getElementById("pairs").textContent=found;
+    factEl.textContent="Did you know? "+DATA[+a.dataset.n].f;
+    if(found===12)finish();
+  }else{
+    lock=true;
+    setTimeout(function(){a.classList.add("bad");b.classList.add("bad")},350);
+    setTimeout(function(){
+      [a,b].forEach(function(x){x.classList.remove("up","bad");x.setAttribute("aria-label","Hidden card")});
+      lock=false;
+    },1100);
+  }
+}
+function finish(){
+  clearInterval(timer);
+  var s=Math.floor((Date.now()-t0)/1000);
+  var rank=moves<=18?"You are worthy of the Jarl Squad!":moves<=26?"A brave guizer!":"The halls are waiting with hot soup.";
+  document.getElementById("wmsg").textContent="You did it in "+moves+" moves and "+fmt(s)+". "+rank;
+  setTimeout(function(){document.getElementById("win").classList.add("show");document.getElementById("again").focus()},700);
+}
+document.getElementById("restart").addEventListener("click",start);
+document.getElementById("again").addEventListener("click",start);
+start();
+</script>
+</body>
+</html>
